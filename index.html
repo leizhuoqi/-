@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+
+	<body>
+		<script type="text/javascript">
+			(function() {
+				function Map(width, height, bgColor) {
+					this.width = width;
+					this.height = height;
+					this.bgColor = bgColor;
+				}
+				Map.prototype.init = function() {
+					var divMap = document.createElement('div');
+					divMap.style.width = this.width + 'px';
+					divMap.style.height = this.height + 'px';
+					divMap.style.backgroundColor = this.bgColor;
+					divMap.style.position = 'relative';
+					divMap.style.margin='0 auto';
+					divMap.id = 'divMap';
+					document.body.appendChild(divMap);
+				}
+				window.Map = Map;
+			})();
+
+			(function() {
+				var elements = [];
+
+				function Food(width, height, bgColor) {
+					this.width = width;
+					this.height = height;
+					this.bgColor = bgColor;
+					this.x = 0;
+					this.y = 0;
+				}
+				Food.prototype.init = function() {
+					remove();
+					var divFood = document.createElement('div');
+					var divMap = document.getElementById('divMap');
+					divFood.style.width = this.width + 'px';
+					divFood.style.height = this.height + 'px';
+					divFood.style.backgroundImage = 'url(img/mianbao.png)';
+					divFood.style.position = 'absolute';
+					this.x = parseInt(Math.random() * (divMap.offsetWidth / this.width));
+					this.y = parseInt(Math.random() * (divMap.offsetHeight / this.height));
+					divFood.style.left = this.x * this.width + 'px';
+					divFood.style.top = this.y * this.height + 'px';
+//					divFood.style.borderRadius='50%';
+					divMap.appendChild(divFood);
+					elements.push(divFood);
+				}
+
+				function remove() {
+					var divMap = document.getElementById('divMap');
+
+					for(var i = 0; i < elements.length; i++) {
+						divMap.removeChild(elements[i]);
+						elements.splice(i, 1);
+					}
+				}
+				window.Food = Food;
+			})();
+
+			(function() {
+				var elements = [];
+
+				function Snake(width, height, dir) {
+					this.width = width;
+					this.height = height;
+					this.dir = dir;
+					this.snbody = [{
+						x: 3,
+						y: 2,
+						bgColor: 'red',
+					}, {
+						x: 2,
+						y: 2,
+						bgColor: 'orange',
+					}, {
+						x: 1,
+						y: 2,
+						bgColor: 'orange',
+					}]
+				}
+				Snake.prototype.init = function() {
+					remove();
+					var divMap = document.getElementById('divMap');
+					for(var i = 0; i < this.snbody.length; i++) {
+						var divS = document.createElement('div');
+						divS.style.width = this.width + 'px';
+						divS.style.height = this.height + 'px';
+						if(this.dir == 'up') {
+						divS.style.backgroundImage='url(img/top.png)'
+					} else if(this.dir == 'right') {
+						divS.style.backgroundImage='url(img/right.png)'
+					} else if(this.dir == 'down') {
+						divS.style.backgroundImage='url(img/down.png)'
+					} else if(this.dir == 'left') {
+						divS.style.backgroundImage='url(img/left.png)'
+					}
+//						if(i==0){
+//							divS.style.backgroundImage = 'url(img/zhangzui.png)';
+//							
+//						}else{
+//							divS.style.backgroundImage = 'url(img/mianbao.png)';
+//							
+//						}
+					//						divS.style.background='orange'
+						divS.style.position = 'absolute';
+						divS.style.left = this.snbody[i].x * this.width + 'px';
+						divS.style.top = this.snbody[i].y * this.height + 'px';
+						divS.id = 'divS';
+//						divS.style.borderRadius='50%';
+						divMap.appendChild(divS)
+						elements.push(divS);
+					}
+				}
+				Snake.prototype.move = function() {
+					var divMap = document.getElementById('divMap');
+					var divS = document.getElementById('divS');
+					for(var i = this.snbody.length - 1; i > 0; i--) {
+						this.snbody[i].x = this.snbody[i - 1].x;
+						this.snbody[i].y = this.snbody[i - 1].y;
+					}
+
+					if(this.dir == 'up') {
+						this.snbody[0].y -= 1;
+						
+					} else if(this.dir == 'right') {
+						this.snbody[0].x += 1;
+					} else if(this.dir == 'down') {
+						this.snbody[0].y += 1;
+					} else if(this.dir == 'left') {
+						this.snbody[0].x -= 1;
+					}
+
+				}
+
+				function remove() {
+					var divMap = document.getElementById('divMap');
+					for(var i = elements.length - 1; i >= 0; i--) {
+						divMap.removeChild(elements[i]);
+						elements.splice(i, 1);
+					}
+				}
+
+				window.Snake = Snake;
+			})();
+
+			//document.createElement('button')
+
+			/*var e=event||window.event;*/
+			(function() {
+				var gameThis = null;
+
+				function Game() {
+					this.map = new Map(900, 600, '#ccc');
+					this.food = new Food(30, 30, 'red');
+					this.snake = new Snake(30, 30, 'right')
+
+					Game.prototype.init = function() {
+						this.map.init();
+						this.food.init();
+						this.snake.init();
+
+					}
+
+					Game.prototype.ruler = function() {
+						var gameThis = this;
+						var dingshi = setInterval(function() {
+							gameThis.snake.move();
+							gameThis.snake.init();
+							function gameOver(){
+								var divOver=document.createElement('div');
+								divOver.style.width='400px';
+								divOver.style.height='400px';
+								divOver.style.background='greenyellow'
+								divOver.style.position='absolute';
+								divOver.style.left = '50%';
+							    divOver.style.marginLeft = '-200px';
+							    divOver.style.top = '50%';
+							    divOver.style.marginTop = '-200px';
+							    divOver.style.zIndex = '10';
+                                divOver.style.lineHeight = '400px';
+							    divOver.style.textAlign ='center';
+                                divOver.style.backgroundImage='url(img/boom1.png)';
+                                divOver.style.backgroundRepeat='no-repeat';
+                                document.body.appendChild(divOver);
+                                
+                                var btnAgain = document.createElement('button');
+							btnAgain.innerText = '菜鸡狗蛋再来一次';
+							btnAgain.onclick = function() {
+								//刷新
+								window.location.reload();
+							}
+							divOver.appendChild(btnAgain);
+
+							}
+							
+							if(gameThis.snake.snbody[0].x == gameThis.map.width/gameThis.snake.width || gameThis.snake.snbody[0].x < 0 || gameThis.snake.snbody[0].y == gameThis.map.height/gameThis.snake.height || gameThis.snake.snbody[0].y < 0) {
+								clearInterval(dingshi);
+								gameOver();
+							}
+							
+							if(gameThis.snake.snbody[0].x == gameThis.food.x && gameThis.snake.snbody[0].y == gameThis.food.y) {
+								
+								gameThis.food.init();
+								
+							var t ={
+								x:gameThis.snake.snbody[gameThis.snake.snbody.length-1].x,
+								y:gameThis.snake.snbody[gameThis.snake.snbody.length-1].y,
+								bgColor:'orange',
+							}
+                             gameThis.snake.snbody.push(t);
+							}
+//						    
+                            for(var i=1;i<gameThis.snake.snbody.length;i++){
+                            	if(gameThis.snake.snbody[0].x == gameThis.snake.snbody[i].x && gameThis.snake.snbody[0].y == gameThis.snake.snbody[i].y){
+                            		clearInterval(dingshi);
+                            	}
+                            }
+
+							document.onkeydown = function(e) {
+								if(e && e.keyCode == 38) {
+									if(gameThis.snake.dir!='down'){
+										gameThis.snake.dir = 'up';
+									}
+								} else if(e && e.keyCode == 39) {
+									if(gameThis.snake.dir!='left'){
+										gameThis.snake.dir = 'right';	
+									}
+								} else if(e && e.keyCode == 40) {
+									if(gameThis.snake.dir!='up'){
+										gameThis.snake.dir = 'down';	
+									}
+								} else if(e && e.keyCode == 37) {
+									if (gameThis.snake.dir != 'right' ){
+										gameThis.snake.dir = 'left';
+									}
+								}
+							
+							}
+						}, 100);
+					}
+										
+				}
+				window.Game = Game;
+			})();
+			var game = new Game();
+			game.init();
+			game.ruler();
+		</script>
+	</body>
+
+</html>
